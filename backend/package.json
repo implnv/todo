@@ -1,0 +1,11 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Работа выполнена студентом группы АСУ-18-1бз Полуяновым Андреем, дисциплина Web-технологии.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Полуянов Андрей",
+  "license": "ISC"
+}
