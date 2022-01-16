@@ -2,9 +2,13 @@ import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { User } from "../models/UserModel.js";
 import { Token } from "../models/TokenModel.js";
+import { validationResult } from "express-validator";
 
 const registration = (req, res) =>  {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ message: 'Ошибка валидации данных' });
+
         const { name, login, password } = req.body;
         const hashPassword = bcrypt.hashSync(password, 10);
     
@@ -37,6 +41,9 @@ const registration = (req, res) =>  {
 
 const login = (req, res) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ message: 'Ошибка валидации данных' });
+
         const { login, password } = req.body;
 
         User.findOne({ login }, (err, dataUser) => {
@@ -45,7 +52,7 @@ const login = (req, res) => {
 
             const isValidPassword = bcrypt.compareSync(password, dataUser.password);
 
-            if (!isValidPassword) return res.status(400).json({ success: false, message: 'Введен неверный пароль' });
+            if (!isValidPassword) return res.status(403).json({ message: 'Введен неверный пароль' });
 
             const payload = {
                 name: dataUser.name,
