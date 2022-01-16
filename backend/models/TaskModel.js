@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const { Schema } = mongoose;
+const { Schema, model } = mongoose;
 
 const taskSchema = new Schema({
     name: String,
@@ -8,4 +8,6 @@ const taskSchema = new Schema({
     author: { type: Schema.Types.ObjectId, ref: 'User' }
 });
 
-export { taskSchema };
+const Task = model('Task', taskSchema)
+
+export { Task }
