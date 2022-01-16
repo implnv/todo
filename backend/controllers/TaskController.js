@@ -1,33 +1,27 @@
 import mongoose from "mongoose";
-import { taskSchema } from "../models/TaskModel.js";
-import jwt from 'jsonwebtoken';
+import { Task } from "../models/TaskModel.js";
 
 const { model } = mongoose;
-const Task = model('Task', taskSchema);
 
 const getTaskById = (req, res) => {
-    const { authorization } = req.headers;
     const { id } = req.body;
+    const { decodedToken } = req;
 
-    if (!authorization) return res.status(403).json({ status: false, message: 'Пользователь не авторизован' });
+    Task.findById(id, (err, r) => {
+        const authorId = JSON.stringify(r.author._id).replace(/\"/g, '');
 
-    try {
-        const token = authorization.split(' ')[1];
-        const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
-    
-        Task.findById(id, (err, r) => {
-            if (r && r.author._id !== decodedToken.id) res.status(200).json({ ...r._doc, success: true });
-            else res.status(400).json({ success: false, message: err });
-        });
-    } catch(err) {
-        res.status(403).json({ status: false, message: 'Ошибка токена' });
-    }
+        if (err) return res.status(400).json({ success: false, message: err });
+        if (r && authorId === decodedToken.id) res.status(200).json({ success: true, ...r._doc });
+    });
 }
 
  const saveTask = (req, res) => {
-    const { name, description, color, author } = req.body;
-    const task = new Task({ name, description, color, author });
+    const { name, description, color } = req.body;
+    const { decodedToken } = req;
 
+    const authorId = decodedToken.id;
+    const task = new Task({ name, description, color, author: authorId });
+    
     task.save().then(r => {
         if (r === task) res.status(200).json({ success: true, message: 'Задача успешно создана' });
         else res.status(400).json({ success: false, message: 'Ошибка сохранения задачи' });
