@@ -10,6 +10,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import { task } from './routes/TaskRoute.js'
 import { user } from './routes/UserRoute.js'
+import { headerMiddleware } from './middleware/headerMiddleware.js';
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+app.use(headerMiddleware);
 app.use(task);
 app.use(user);
 
