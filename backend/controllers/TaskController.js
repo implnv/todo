@@ -1,31 +1,30 @@
-import mongoose from "mongoose";
 import { Task } from "../models/TaskModel.js";
 
-const { model } = mongoose;
+const tasks = (req, res) => {
+    const { id } = req.params;
 
-const getTaskById = (req, res) => {
-    const { id } = req.body;
-    const { decodedToken } = req;
-
-    Task.findById(id, (err, r) => {
-        const authorId = JSON.stringify(r.author._id).replace(/\"/g, '');
-
-        if (err) return res.status(400).json({ success: false, message: err });
-        if (r && authorId === decodedToken.id) res.status(200).json({ success: true, ...r._doc });
+    Task.find({ author: id }, (err, dataTasks) => {
+        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
+        return res.status(200).json({ tasks: dataTasks });
     });
 }
 
- const saveTask = (req, res) => {
-    const { name, description, color } = req.body;
-    const { decodedToken } = req;
+const taskCreate = (req, res) => {
+    const { name, description, color, type, author } = req.body;
 
-    const authorId = decodedToken.id;
-    const task = new Task({ name, description, color, author: authorId });
-    
-    task.save().then(r => {
-        if (r === task) res.status(200).json({ success: true, message: 'Задача успешно создана' });
-        else res.status(400).json({ success: false, message: 'Ошибка сохранения задачи' });
+    Task.create({name, description, color, type, author}, (err, dataTask) => {
+        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
+        return res.status(200).json({ 'task': dataTask, 'message': 'Задача успешно создана' });
     });
 }
 
-export { getTaskById, saveTask }
+const taskMove = (req, res) => {
+    const { uid, type } = req.body;
+
+    Task.findByIdAndUpdate({ _id: uid }, { type }, { new: true }, (err, dataTask) => {
+        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
+        return res.status(200).json({ 'task': dataTask, 'message': 'Задача успешно обновлена' });
+    });
+}
+
+export { tasks, taskCreate, taskMove }

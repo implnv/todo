@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import { User } from "../models/UserModel.js";
-import { Token } from "../models/TokenModel.js";
-import { tokenGenerate } from "../utils/tokenGenerate.js";
+import { tokenGenerate, verifyAccessToken } from "../utils/tokenUtils.js";
 import { validationResult } from "express-validator";
 
 const registration = (req, res) =>  {
@@ -16,17 +15,33 @@ const registration = (req, res) =>  {
             if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' }); 
             if (dataUser) return res.status(200).json({ 'message': 'Пользователь зарегистрирован в системе' }); 
 
-            User.create({ name, login, 'password': hashPassword }, (err, dataUser) => {
+            const props = {
+                'block_1': {
+                    name: 'Текущие',
+                    color: '#6384e373'
+                },
+                'block_2': {
+                    name: 'Важные',
+                    color: '#f1e699ba'
+                },
+                'block_3': {
+                    name: 'Срочные',
+                    color: '#ff7a7a'
+                },
+                'block_4': {
+                    name: 'Отложенные',
+                    color: '#e5e5e5'
+                }
+            }
+
+            User.create({ name, login, 'password': hashPassword, props }, (err, dataUser) => {
                 if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
                 
                 const { accessToken, refreshToken } = tokenGenerate(dataUser);
-        
-                Token.create({ 'user': dataUser._id, refresh: refreshToken }, (err, dataToken) => {
-                    if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
-                    
-                    res.cookie('refreshToken', refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-                    res.status(200).json({ user: { name: dataUser.name, login: dataUser.login }, tokens: { access: accessToken, refresh: dataToken.refresh } });
-                });
+                
+                // res.cookie('accessToken', accessToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+                // res.cookie('refreshToken', refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+                res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }, tokens: { access: accessToken, refresh: refreshToken } });
             });
         });
     } catch (e) {
@@ -51,36 +66,41 @@ const login = (req, res) => {
 
             const { accessToken, refreshToken } = tokenGenerate(dataUser);
 
-            Token.findOne({ 'user': dataUser._id }, (err, dataToken) => {
-                if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
-                if (!dataToken) {
-                    Token.create({ 'user': dataUser._id, 'refresh': refreshToken }, (err, dataToken) => {
-                        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
-        
-                        res.cookie('refreshToken', refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-                        res.status(200).json({ 'user': { 'name': dataUser.name, 'login': dataUser.login, 'tasks': dataUser.tasks }, 'tokens': { 'access': accessToken, 'refresh': dataToken.refresh } });
-                    });
-                }
-                else res.status(500).json({ 'message': 'Открыта действующая сессия' });
-            });
+            res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }, tokens: { access: accessToken, refresh: refreshToken } });
         });
     } catch (e) {
         res.status(500).json({ 'message': 'Непредвиденная ошибка сервера' });
     }
 }
 
-const logout = (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ 'message': 'Ошибка валидации данных' });
+const refresh = (req, res) => {
+    const { token } = req.body;
+    if (!token) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
 
-    const { refreshToken } = req.cookies;
+    const user = verifyAccessToken(token);
     
-    Token.deleteOne({ 'refresh': refreshToken }, (err, dataToken) => {
-        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
-
-        res.clearCookie('refreshToken');
-        res.status(200).json({ 'message': 'Токен успешно удален' });
+    if (!user) return res.status(500).json({ 'message': 'Верификация не пройдена, токен невалиден' });
+    User.findById(user.id, (err, dataUser) => {
+        const { accessToken, refreshToken } = tokenGenerate(user);
+        res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }, tokens: { access: accessToken, refresh: refreshToken }, message: 'Токены успешно обновлены' });
     });
 }
 
-export { registration, login, logout }
+const editProps = (req, res) => {
+    const { type, color, name, login } = req.body;
+
+    User.findOne({ login }, (err, dataUser) => {
+        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' }); 
+        const { props } = dataUser;
+        props[type] = {
+            name,
+            color
+        }
+        User.findOneAndUpdate({ login }, { props }, {new: true}, (err, dataUser) => {
+            if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' }); 
+            res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }, message: 'Плитки успешно обновлены' });
+        })
+    });
+}
+
+export { registration, login, refresh, editProps }

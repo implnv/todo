@@ -6,6 +6,7 @@ if (result.error)
     throw result.error;
 
 import express from 'express';
+import cors from 'cors';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import { task } from './routes/TaskRoute.js'
@@ -14,6 +15,10 @@ import { headerMiddleware } from './middleware/headerMiddleware.js';
 
 const app = express();
 
+app.use(cors({
+    origin: "http://localhost:8080",
+    credentials: true
+}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());

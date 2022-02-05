@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { registration, login, logout } from '../controllers/UserController.js';
+import { registration, login, refresh, editProps } from '../controllers/UserController.js';
 import { body } from 'express-validator'; 
 
 const user = Router();
@@ -13,6 +13,7 @@ user.post('/api/user/login',
                                     body('password').isLength({ min: 4, max: 8 }), 
                                     login);
 
-user.post('/api/user/logout', body('login').isEmail(), logout)
+user.post('/api/user/refresh', refresh);
+user.post('/api/user/props', editProps);
 
 export { user }

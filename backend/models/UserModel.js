@@ -5,7 +5,24 @@ const userSchema = new Schema({
     name: String,
     login: String,
     password: String,
-    tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }]
+    props: {
+        block_1: {
+            name: String,
+            color: String
+        },
+        block_2: {
+            name: String,
+            color: String
+        },
+        block_3: {
+            name: String,
+            color: String
+        },
+        block_4: {
+            name: String,
+            color: String
+        }
+    }
 });
 
 const User = model('User', userSchema);

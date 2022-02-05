@@ -5,6 +5,7 @@ const taskSchema = new Schema({
     name: String,
     description: String,
     color: String,
+    type: String,
     author: { type: Schema.Types.ObjectId, ref: 'User' }
 });
 
