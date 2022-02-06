@@ -60,7 +60,7 @@ class taskAPI {
     );
     static move = createAsyncThunk(
         'tasks/move', 
-        async ({uid, type}) => {
+        async ({ uid, type }) => {
             let response = await axios({
                 method: constantsAPI.TASK_MOVE.method,
                 url: constantsAPI.TASK_MOVE.url,
