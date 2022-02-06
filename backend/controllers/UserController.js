@@ -18,7 +18,7 @@ const registration = (req, res) =>  {
             const props = {
                 'block_1': {
                     name: 'Текущие',
-                    color: '#6384e373'
+                    color: '#6cbce9'
                 },
                 'block_2': {
                     name: 'Важные',

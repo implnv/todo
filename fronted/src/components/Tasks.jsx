@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Row, Col, Button, Card } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Row, Col, Button, Card, Modal, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import moment from 'moment';
 import hexToHsl from 'hex-to-hsl';
@@ -12,14 +12,16 @@ const Tasks = () => {
     const user = useSelector(state => state.user);
     const { id, props } = user;
 
-    const tasks = useSelector(state => state.tasks);
-    const taskList = tasks.tasks;
+    const { tasks } = useSelector(state => state.tasks);
+
+    const [showModal, setShowModal] = useState(false);
+    const [currentTask, setCurrentTask] = useState([]);
 
     useEffect(() => {
         if (id) dispatch(taskAPI.getTasks(id));
     }, [dispatch, id])
     
-    if (!taskList) return null;
+    if (!tasks) return null;
 
     const drop_handler = event => {
         const uid = event.dataTransfer.getData("application/uid");
@@ -43,15 +45,29 @@ const Tasks = () => {
     const tasksUrgent = [];
     const tasksDelayed = [];
 
+    const handleCloseModal = () => {
+        setCurrentTask([]);
+        setShowModal(false);
+    }
+    const handleShowModal = event => {
+        const uid = event.target.getAttribute('uid');
+        const task = tasks.filter(element => element._id === uid)[0];
+
+        setCurrentTask(task);
+        setShowModal(true);
+    };
+
     const handleEditTask = () => {
-        alert()
+        dispatch(taskAPI.editTask(currentTask));
+        handleCloseModal();
     }
 
-    const handleDeleteTask = () => {
-
+    const handleDeleteTask = event => {
+        const uid = event.target.getAttribute('uid');
+        dispatch(taskAPI.deleteTask(uid));
     }
-    console.log('1');
-    taskList.map((elem) => {
+
+    tasks.map((elem) => {
         const date = moment(elem.date).format('lll');
         const hsl = hexToHsl(elem.color);
 
@@ -67,8 +83,8 @@ const Tasks = () => {
                 <Card.Footer>
                     <Row>
                         <Col md={5}>
-                            <Button size="sm" variant={variant} onClick={handleEditTask} className="me-2"><i className="bi bi-pen"></i></Button>
-                            <Button size="sm" variant={variant} onClick={handleDeleteTask}><i className="bi bi-trash"></i></Button>
+                            <Button size="sm" variant={variant} onClick={handleShowModal} className="me-2" uid={elem._id}><i className="bi bi-pen" uid={elem._id}></i></Button>
+                            <Button size="sm" variant={variant} onClick={handleDeleteTask} uid={elem._id}><i className="bi bi-trash" uid={elem._id}></i></Button>
                         </Col>
                         <Col md={7} style={{ textAlign: 'end' }}><span style={{ fontSize: '12px' }}>{date}</span></Col>
                     </Row>
@@ -82,40 +98,58 @@ const Tasks = () => {
     });
 
     return (
-        <Row className="mt-3" style={{ height: 'calc(100vh - 70px - 4rem)' }}>
-            <Col style={{ height: 'inherit' }}>
-                <h5 className="text-center">{ props.block_1.name }</h5>
-                <div className="rounded-3 overflow-auto" type='block_1' onDrop={drop_handler} onDragOver={dragover_handler}style={{ backgroundColor: props.block_1.color, height: 'calc(100% - 2rem)' }}>
-                    <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
-                        {tasksCurrent}
+        <>
+            <Modal show={ showModal } onHide={ handleCloseModal } centered='true'>
+                <Modal.Header closeButton>
+                    <Modal.Title>Редактирование плиток</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <h5>Название задачи</h5>
+                    <Form.Control type='text' placeholder={currentTask?.name } onChange={ event => setCurrentTask({ ...currentTask, name: event.target.value}) } />
+                    <br />
+                    <h5>Описание задачи</h5>
+                    <Form.Control as='textarea' placeholder={currentTask?.description} onChange={ event => setCurrentTask({ ...currentTask, description: event.target.value}) } />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="outline-dark" onClick={ handleCloseModal }>Закрыть</Button>
+                    <Button variant="dark" onClick={ handleEditTask }>Сохранить</Button>
+                </Modal.Footer>
+            </Modal>
+            <Row className="mt-3" style={{ height: 'calc(100vh - 70px - 4rem)' }}>
+                <Col style={{ height: 'inherit' }}>
+                    <h5 className="text-center">{ props.block_1.name }</h5>
+                    <div className="rounded-3 overflow-auto" type='block_1' onDrop={drop_handler} onDragOver={dragover_handler}style={{ backgroundColor: props.block_1.color, height: 'calc(100% - 2rem)' }}>
+                        <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
+                            {tasksCurrent}
+                        </div>
                     </div>
-                </div>
-            </Col>
-            <Col style={{ height: 'inherit' }}>
-                <h5 className="text-center">{ props.block_2.name }</h5>
-                <div className="rounded-3 overflow-auto" type='block_2' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_2.color, height: 'calc(100% - 2rem)' }}>
-                    <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
-                        {tasksImportant}
+                </Col>
+                <Col style={{ height: 'inherit' }}>
+                    <h5 className="text-center">{ props.block_2.name }</h5>
+                    <div className="rounded-3 overflow-auto" type='block_2' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_2.color, height: 'calc(100% - 2rem)' }}>
+                        <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
+                            {tasksImportant}
+                        </div>
                     </div>
-                </div>
-            </Col>
-            <Col style={{ height: 'inherit' }}>
-                <h5 className="text-center">{ props.block_3.name }</h5>
-                <div className="rounded-3 overflow-auto" type='block_3' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_3.color, height: 'calc(100% - 2rem)' }}>
-                    <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
-                        {tasksUrgent}
+                </Col>
+                <Col style={{ height: 'inherit' }}>
+                    <h5 className="text-center">{ props.block_3.name }</h5>
+                    <div className="rounded-3 overflow-auto" type='block_3' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_3.color, height: 'calc(100% - 2rem)' }}>
+                        <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
+                            {tasksUrgent}
+                        </div>
                     </div>
-                </div>
-            </Col>
-            <Col style={{ height: 'inherit' }}>
-                <h5 className="text-center">{ props.block_4.name }</h5>
-                <div className="rounded-3 overflow-auto" type='block_4' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_4.color, height: 'calc(100% - 2rem)' }}>
-                    <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
-                        {tasksDelayed}
+                </Col>
+                <Col style={{ height: 'inherit' }}>
+                    <h5 className="text-center">{ props.block_4.name }</h5>
+                    <div className="rounded-3 overflow-auto" type='block_4' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_4.color, height: 'calc(100% - 2rem)' }}>
+                        <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
+                            {tasksDelayed}
+                        </div>
                     </div>
-                </div>
-            </Col>
-        </Row>
+                </Col>
+            </Row>
+        </>
     );
 }
 

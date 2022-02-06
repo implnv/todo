@@ -22,7 +22,7 @@ const Header = () => {
     const [task, setTask] = useState({
         type: 'block_1'
     });
-    const [currentEditTask, setCurrentEditTask] = useState({ type: 'block_1' });
+    const [currentEditBlock, setCurrentEditBlock] = useState({ type: 'block_1' });
 
     const handleLogout = () =>  { 
         dispatch(userSlice.actions.logout());
@@ -35,8 +35,8 @@ const Header = () => {
     }
 
     const handleProps = () => {
-        console.log(props[currentEditTask.type].name);
-        dispatch(userAPI.editProps({ ...currentEditTask, color: color, login: user.login }));
+        console.log(props[currentEditBlock.type].name);
+        dispatch(userAPI.editProps({ ...currentEditBlock, color: color, login: user.login }));
         handleCloseEditProps();
     }
 
@@ -47,7 +47,7 @@ const Header = () => {
     const handleShowEditProps = () => setShowEditProps(true);
     const handleCloseEditProps = () => { 
         setShowEditProps(false);
-        setCurrentEditTask({ type: 'block_1' }); 
+        setCurrentEditBlock({ type: 'block_1' }); 
     }
 
     return (
@@ -60,7 +60,7 @@ const Header = () => {
                     <Row>
                         <Col>
                             <h5>Раздел</h5>
-                            <Form.Select onChange={ event => setCurrentEditTask({...currentEditTask, type: event.target.value}) }>
+                            <Form.Select onChange={ event => setCurrentEditBlock({...currentEditBlock, type: event.target.value}) }>
                                 <option value="block_1">{props.block_1.name}</option>
                                 <option value="block_2">{props.block_2.name}</option>
                                 <option value="block_3">{props.block_3.name}</option>
@@ -68,11 +68,11 @@ const Header = () => {
                             </Form.Select>
                             <br />
                             <h5>Новое название</h5>
-                            <Form.Control type='text' placeholder={props[currentEditTask.type].name} onChange={ event => setCurrentEditTask({ ...currentEditTask, name: event.target.value }) }/>
+                            <Form.Control type='text' placeholder={props[currentEditBlock.type].name} onChange={ event => setCurrentEditBlock({ ...currentEditBlock, name: event.target.value }) }/>
                         </Col>
                         <Col>
                             <h5>Новый цвет фона</h5>
-                            <HexColorPicker color={ props[currentEditTask.type].color } onChange={ setColor } />
+                            <HexColorPicker color={ props[currentEditBlock.type].color } onChange={ setColor } />
                         </Col>
                     </Row>
                 </Modal.Body>
@@ -118,6 +118,7 @@ const Header = () => {
                 <h5 className='text-truncate'>Привет, { name }</h5>
                 <Button className='me-2' variant="outline-dark" onClick={ handleShowAdd }><i className="bi bi-plus-square"></i></Button>
                 <Button className='me-2' variant="outline-dark" onClick={ handleShowEditProps }><i className="bi bi-pencil-square"></i></Button>
+                <Button className='me-2' variant="outline-dark"><i className="bi bi-folder"></i></Button>
                 <Button variant="light" onClick={ handleLogout }><i className="bi bi-box-arrow-left"></i> Выход</Button>
             </div>  
         </>

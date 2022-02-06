@@ -18,6 +18,24 @@ const taskCreate = (req, res) => {
     });
 }
 
+const taskEdit = (req, res) => {
+    const { id, name, description } = req.body;
+    console.log(name, description);
+    Task.findByIdAndUpdate(id, { name, description }, { new: true }, (err, dataTask) => {
+        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
+        return res.status(200).json({ 'task': dataTask, 'message': 'Задача успешно отредактирована' });
+    });
+}
+
+const taskDelete = (req, res) => {
+    const { id } = req.body;
+
+    Task.findByIdAndDelete(id, (err, dataTasks) => {
+        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
+        return res.status(200).json({ 'task': dataTasks, 'message': 'Задача успешно удалена' });
+    });
+}
+
 const taskMove = (req, res) => {
     const { uid, type } = req.body;
 
@@ -27,4 +45,4 @@ const taskMove = (req, res) => {
     });
 }
 
-export { tasks, taskCreate, taskMove }
+export { tasks, taskCreate, taskEdit, taskDelete, taskMove }
