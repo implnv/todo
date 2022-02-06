@@ -101,13 +101,13 @@ const Tasks = () => {
         <>
             <Modal show={ showModal } onHide={ handleCloseModal } centered='true'>
                 <Modal.Header closeButton>
-                    <Modal.Title>Редактирование плиток</Modal.Title>
+                    <Modal.Title>Редактирование задачи</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <h5>Название задачи</h5>
+                    <Form.Label>Название задачи</Form.Label>
                     <Form.Control type='text' placeholder={currentTask?.name } onChange={ event => setCurrentTask({ ...currentTask, name: event.target.value}) } />
                     <br />
-                    <h5>Описание задачи</h5>
+                    <Form.Label>Описание задачи</Form.Label>
                     <Form.Control as='textarea' placeholder={currentTask?.description} onChange={ event => setCurrentTask({ ...currentTask, description: event.target.value}) } />
                 </Modal.Body>
                 <Modal.Footer>
