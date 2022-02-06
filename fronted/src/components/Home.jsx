@@ -16,7 +16,7 @@ const Home = () => {
     }, [dispatch, token]);
 
     return (
-        <div className="mt-3 ms-5 me-5">
+        <div className="m-3 overflow-hidden">
             <Header />
             <Tasks />
         </div>
