@@ -9,24 +9,22 @@ moment.locale('ru');
 
 const Tasks = () => {
     const dispatch = useDispatch();
-    const user = useSelector(state => state.user);
-    const { id, props } = user;
-
+    const { props } = useSelector(state => state.user);
     const { tasks } = useSelector(state => state.tasks);
 
     const [showModal, setShowModal] = useState(false);
     const [currentTask, setCurrentTask] = useState([]);
 
     useEffect(() => {
-        if (id) dispatch(taskAPI.getTasks(id));
-    }, [dispatch, id])
+        dispatch(taskAPI.getTasks());
+    }, [])
     
     if (!tasks) return null;
 
     const drop_handler = event => {
         const uid = event.dataTransfer.getData("application/uid");
         const type = event.target.getAttribute('type');
-        if (uid && type) dispatch(taskAPI.move({ uid, type}));
+        if (uid && type) dispatch(taskAPI.moveTask({ id: uid, type }));
     }
     
     const dragover_handler = event => {
@@ -117,32 +115,32 @@ const Tasks = () => {
             </Modal>
             <Row className="mt-3" style={{ height: 'calc(100vh - 70px - 4rem)' }}>
                 <Col style={{ height: 'inherit' }}>
-                    <h5 className="text-center">{ props.block_1.name }</h5>
-                    <div className="rounded-3 overflow-auto" type='block_1' onDrop={drop_handler} onDragOver={dragover_handler}style={{ backgroundColor: props.block_1.color, height: 'calc(100% - 2rem)' }}>
+                    <h5 className="text-center">{ props?.block_1.name }</h5>
+                    <div className="rounded-3 overflow-auto" type='block_1' onDrop={drop_handler} onDragOver={dragover_handler}style={{ backgroundColor: props?.block_1.color, height: 'calc(100% - 2rem)' }}>
                         <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
                             {tasksCurrent}
                         </div>
                     </div>
                 </Col>
                 <Col style={{ height: 'inherit' }}>
-                    <h5 className="text-center">{ props.block_2.name }</h5>
-                    <div className="rounded-3 overflow-auto" type='block_2' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_2.color, height: 'calc(100% - 2rem)' }}>
+                    <h5 className="text-center">{ props?.block_2.name }</h5>
+                    <div className="rounded-3 overflow-auto" type='block_2' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props?.block_2.color, height: 'calc(100% - 2rem)' }}>
                         <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
                             {tasksImportant}
                         </div>
                     </div>
                 </Col>
                 <Col style={{ height: 'inherit' }}>
-                    <h5 className="text-center">{ props.block_3.name }</h5>
-                    <div className="rounded-3 overflow-auto" type='block_3' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_3.color, height: 'calc(100% - 2rem)' }}>
+                    <h5 className="text-center">{ props?.block_3.name }</h5>
+                    <div className="rounded-3 overflow-auto" type='block_3' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props?.block_3.color, height: 'calc(100% - 2rem)' }}>
                         <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
                             {tasksUrgent}
                         </div>
                     </div>
                 </Col>
                 <Col style={{ height: 'inherit' }}>
-                    <h5 className="text-center">{ props.block_4.name }</h5>
-                    <div className="rounded-3 overflow-auto" type='block_4' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props.block_4.color, height: 'calc(100% - 2rem)' }}>
+                    <h5 className="text-center">{ props?.block_4.name }</h5>
+                    <div className="rounded-3 overflow-auto" type='block_4' onDrop={drop_handler} onDragOver={dragover_handler} style={{ backgroundColor: props?.block_4.color, height: 'calc(100% - 2rem)' }}>
                         <div className="m-2" onDrop={drop_handler} onDragOver={dragover_handler}>
                             {tasksDelayed}
                         </div>

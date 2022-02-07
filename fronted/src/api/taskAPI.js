@@ -4,17 +4,17 @@ import request from './request';
 class taskAPI {
     static getTasks = createAsyncThunk(
         'tasks/get', 
-        async (author) => {
+        async () => {
             let response = await request({
                 method: constantsAPI.TASKS.method,
-                url: `${constantsAPI.TASKS.url + author}`
+                url: constantsAPI.TASKS.url
             });
             return response.data;
         }
     );
     static createTask = createAsyncThunk(
         'tasks/create',
-        async ({ name, description, color, type, author }) => {
+        async ({ name, description, color, type }) => {
             let response = await request({
                 method: constantsAPI.TASK_CREATE.method,
                 url: constantsAPI.TASK_CREATE.url,
@@ -22,8 +22,7 @@ class taskAPI {
                     name,
                     description,
                     color,
-                    type,
-                    author
+                    type
                 }
             });
             return response.data;
@@ -57,14 +56,14 @@ class taskAPI {
             return response.data;
         }
     );
-    static move = createAsyncThunk(
+    static moveTask = createAsyncThunk(
         'tasks/move', 
-        async ({ uid, type }) => {
+        async ({ id, type }) => {
             let response = await request({
                 method: constantsAPI.TASK_MOVE.method,
                 url: constantsAPI.TASK_MOVE.url,
                 data: {
-                    uid,
+                    id,
                     type
                 }
             });

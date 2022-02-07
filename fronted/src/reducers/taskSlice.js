@@ -2,18 +2,13 @@ import { createSlice } from '@reduxjs/toolkit';
 import taskAPI from '../api/taskAPI';
 
 const initialState = {
-    tasks: null,
-    refreshNeeded: false
+    tasks: null
 };
 
 const taskSlice = createSlice({
     name: 'tasks',
     initialState,
-    reducers: {
-        toogleRefresh: (state) => {
-            state.refreshNeeded = !state.refreshNeeded;
-        }
-    },
+    reducers: {},
     extraReducers: {
         [taskAPI.getTasks.fulfilled]: (state, { payload }) => {
             state.tasks = payload.tasks;
@@ -32,7 +27,7 @@ const taskSlice = createSlice({
         [taskAPI.deleteTask.fulfilled]: (state, { payload }) => {
             state.tasks = state.tasks.filter(element => element._id != payload.task._id);
         },
-        [taskAPI.move.fulfilled]: (state, { payload }) => {
+        [taskAPI.moveTask.fulfilled]: (state, { payload }) => {
             state.tasks.forEach(element => {
                 if (element._id === payload.task._id) {
                     element.type = payload.task.type;

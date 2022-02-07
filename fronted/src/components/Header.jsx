@@ -13,16 +13,14 @@ const Header = () => {
     const navigate = useNavigate();
 
     const user = useSelector(state => state.user);
-    const { id, name, props } = user;
+    const { name, props } = user;
 
     const [show, setShow] = useState(false);
     const [showEdit, setShowEditProps] = useState(false);
     const [showFileDialog, setShowFileDialog] = useState(false);
 
     const [color, setColor] = useState('#ffffff');
-    const [task, setTask] = useState({
-        type: 'block_1'
-    });
+    const [task, setTask] = useState({ type: 'block_1' });
     const [currentEditBlock, setCurrentEditBlock] = useState({ type: 'block_1' });
     const [previewCard, setPreviewCard] = useState({ show: false, name: '', description: '', color: '#e9e9e9', type: 'block_1' });
 
@@ -31,18 +29,15 @@ const Header = () => {
         navigate('/login', { replace: true });
     }
     const handleTask = () => {
-        dispatch(taskAPI.createTask({ ...task, color: color, author: id }));
-        dispatch(taskSlice.actions.toogleRefresh());
+        dispatch(taskAPI.createTask({ ...task, color: color }));
         handleCloseAdd();
     }
 
     const handleProps = () => {
-        dispatch(userAPI.editProps({ ...currentEditBlock, color: color, login: user.login }));
+        dispatch(userAPI.editProps({ ...currentEditBlock, color: color }));
         handleCloseEditProps();
     }
 
-    if (!user.id) return null;
-    
     const handleShowAdd = () => setShow(true);
     const handleCloseAdd = () => setShow(false);
 
@@ -76,7 +71,7 @@ const Header = () => {
     }
 
     const handleAddTaskFromFile = () => {
-        dispatch(taskAPI.createTask({ ...previewCard, author: id }));
+        dispatch(taskAPI.createTask(previewCard));
         handleCloseFileDialog();
     }
 
@@ -126,18 +121,18 @@ const Header = () => {
                         <Col>
                             <h5>Раздел</h5>
                             <Form.Select onChange={ event => setCurrentEditBlock({...currentEditBlock, type: event.target.value}) }>
-                                <option value="block_1">{props.block_1.name}</option>
-                                <option value="block_2">{props.block_2.name}</option>
-                                <option value="block_3">{props.block_3.name}</option>
-                                <option value="block_4">{props.block_4.name}</option>
+                                <option value="block_1">{props?.block_1.name}</option>
+                                <option value="block_2">{props?.block_2.name}</option>
+                                <option value="block_3">{props?.block_3.name}</option>
+                                <option value="block_4">{props?.block_4.name}</option>
                             </Form.Select>
                             <br />
                             <h5>Новое название</h5>
-                            <Form.Control type='text' placeholder={props[currentEditBlock.type].name} onChange={ event => setCurrentEditBlock({ ...currentEditBlock, name: event.target.value }) }/>
+                            <Form.Control type='text' placeholder={props?.[currentEditBlock.type].name} onChange={ event => setCurrentEditBlock({ ...currentEditBlock, name: event.target.value }) }/>
                         </Col>
                         <Col>
                             <h5>Новый цвет фона</h5>
-                            <HexColorPicker color={ props[currentEditBlock.type].color } onChange={ setColor } />
+                            <HexColorPicker color={ props?.[currentEditBlock.type].color } onChange={ setColor } />
                         </Col>
                     </Row>
                 </Modal.Body>
@@ -163,10 +158,10 @@ const Header = () => {
                         <Col>
                             <h5>Раздел</h5>
                             <Form.Select onChange={ event => setTask({ ...task, type: event.target.value }) }>
-                                <option value="block_1">{props.block_1.name}</option>
-                                <option value="block_2">{props.block_2.name}</option>
-                                <option value="block_3">{props.block_3.name}</option>
-                                <option value="block_4">{props.block_4.name}</option>
+                                <option value="block_1">{props?.block_1.name}</option>
+                                <option value="block_2">{props?.block_2.name}</option>
+                                <option value="block_3">{props?.block_3.name}</option>
+                                <option value="block_4">{props?.block_4.name}</option>
                             </Form.Select>
                             <br />
                             <h5>Цвет плитки</h5>

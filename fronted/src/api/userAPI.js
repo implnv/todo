@@ -47,16 +47,25 @@ class userAPI {
     );
     static editProps = createAsyncThunk(
         'user/editProps',
-        async ({ type, color, name, login }) => {
+        async ({ type, color, name }) => {
             let response = await request({
                 method: constantsAPI.EDIT_PROPS.method,
                 url: constantsAPI.EDIT_PROPS.url,
                 data: {
-                    login,
                     type,
                     color,
                     name
                 }
+            });
+            return response.data;
+        }
+    );
+    static init = createAsyncThunk(
+        'user/init',
+        async () => {
+            let response = await request({
+                method: constantsAPI.USER_INIT.method,
+                url: constantsAPI.USER_INIT.url
             });
             return response.data;
         }

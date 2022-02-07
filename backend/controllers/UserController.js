@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { User } from "../models/UserModel.js";
-import { tokenGenerate, verifyAccessToken } from "../utils/tokenUtils.js";
+import { tokenGenerate, verifyRefreshToken } from "../utils/tokenUtils.js";
 import { validationResult } from "express-validator";
 
 const registration = (req, res) =>  {
@@ -36,11 +36,8 @@ const registration = (req, res) =>  {
 
             User.create({ name, login, 'password': hashPassword, props }, (err, dataUser) => {
                 if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
-                
+
                 const { accessToken, refreshToken } = tokenGenerate(dataUser);
-                
-                // res.cookie('accessToken', accessToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-                // res.cookie('refreshToken', refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
                 res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }, tokens: { access: accessToken, refresh: refreshToken } });
             });
         });
@@ -74,33 +71,51 @@ const login = (req, res) => {
 }
 
 const refresh = (req, res) => {
-    const { token } = req.body;
-    if (!token) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
+    try {
+        const { token } = req.body;
+        if (!token) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
 
-    const user = verifyAccessToken(token);
-    
-    if (!user) return res.status(500).json({ 'message': 'Верификация не пройдена, токен невалиден' });
-    User.findById(user.id, (err, dataUser) => {
-        const { accessToken, refreshToken } = tokenGenerate(user);
-        res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }, tokens: { access: accessToken, refresh: refreshToken }, message: 'Токены успешно обновлены' });
-    });
+        const user = verifyRefreshToken(token);
+        if (!user) return res.status(500).json({ 'message': 'Верификация не пройдена, токен невалиден' });
+
+        const { accessToken, refreshToken } = tokenGenerate(user); 
+        res.status(200).json({ tokens: { access: accessToken, refresh: refreshToken }, message: 'Токены успешно обновлены' });
+    } catch (e) {
+        res.status(500).json({ 'message': 'Непредвиденная ошибка сервера' });
+    }
 }
 
 const editProps = (req, res) => {
-    const { type, color, name, login } = req.body;
+    try {
+        const { type, color, name } = req.body;
+        const { id } = req.user;
 
-    User.findOne({ login }, (err, dataUser) => {
-        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' }); 
-        const { props } = dataUser;
-        props[type] = {
-            name,
-            color
-        }
-        User.findOneAndUpdate({ login }, { props }, {new: true}, (err, dataUser) => {
+        User.findById(id, (err, dataUser) => {
             if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' }); 
-            res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }, message: 'Плитки успешно обновлены' });
-        })
+            const { props } = dataUser;
+            props[type] = {
+                name,
+                color
+            }
+            User.findByIdAndUpdate(id, { props }, {new: true}, (err, dataUser) => {
+                if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' }); 
+                res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }, message: 'Плитки успешно обновлены' });
+            })
+        });
+    } catch (e) {
+        res.status(500).json({ 'message': 'Непредвиденная ошибка сервера' });
+    }
+}
+
+const init = (req, res) => {
+    const { id } = req.user;
+
+    User.findById(id, (err, dataUser) => {
+        if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' }); 
+        if (!dataUser) return res.status(200).json({ 'message': 'Пользователь не зарегистрирован в системе' }); 
+
+        res.status(200).json({ user: { id: dataUser._id, name: dataUser.name, login: dataUser.login, props: dataUser.props }});
     });
 }
 
-export { registration, login, refresh, editProps }
+export { registration, login, refresh, editProps, init }

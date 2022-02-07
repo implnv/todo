@@ -8,7 +8,6 @@ const changeUserState = (state, payload) => {
     state.id = id;
     state.name = name;
     state.login = login;
-    state.accessToken = access;
     state.props = props;
 
     localStorage.setItem('accessToken', access);
@@ -27,7 +26,7 @@ const initialState = {
     id: '',
     name: '',
     login: '',
-    accessToken: ''
+    // accessToken: ''
 };
 
 const userSlice = createSlice({
@@ -42,6 +41,14 @@ const userSlice = createSlice({
         [userAPI.refresh.fulfilled]: (state, { payload }) => changeUserState(state, payload),
         [userAPI.editProps.fulfilled]: (state, { payload }) => {
             state.props = payload.user.props;
+        },
+        [userAPI.init.fulfilled]: (state, { payload }) => {
+            const { id, name, login, props } = payload.user;
+            
+            state.id = id;
+            state.name = name;
+            state.login = login;
+            state.props = props;
         }
     }
 });

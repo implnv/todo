@@ -24,8 +24,8 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 app.use(headerMiddleware);
-app.use(task);
 app.use(user);
+app.use(task);
 
 try {
     await mongoose.connect(process.env.MONGODB_SERVER, { useUnifiedTopology: true, useNewUrlParser: true });

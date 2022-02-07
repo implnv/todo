@@ -1,7 +1,7 @@
 import { Task } from "../models/TaskModel.js";
 
-const tasks = (req, res) => {
-    const { id } = req.params;
+const tasksGet = (req, res) => {
+    const { id } = req.user;
 
     Task.find({ author: id }, (err, dataTasks) => {
         if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
@@ -10,9 +10,10 @@ const tasks = (req, res) => {
 }
 
 const taskCreate = (req, res) => {
-    const { name, description, color, type, author } = req.body;
+    const { name, description, color, type } = req.body;
+    const { id } = req.user;
 
-    Task.create({name, description, color, type, author}, (err, dataTask) => {
+    Task.create({name, description, color, type, author: id}, (err, dataTask) => {
         if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
         return res.status(200).json({ 'task': dataTask, 'message': 'Задача успешно создана' });
     });
@@ -20,7 +21,7 @@ const taskCreate = (req, res) => {
 
 const taskEdit = (req, res) => {
     const { id, name, description } = req.body;
-    console.log(name, description);
+
     Task.findByIdAndUpdate(id, { name, description }, { new: true }, (err, dataTask) => {
         if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
         return res.status(200).json({ 'task': dataTask, 'message': 'Задача успешно отредактирована' });
@@ -37,12 +38,12 @@ const taskDelete = (req, res) => {
 }
 
 const taskMove = (req, res) => {
-    const { uid, type } = req.body;
+    const { id, type } = req.body;
 
-    Task.findByIdAndUpdate({ _id: uid }, { type }, { new: true }, (err, dataTask) => {
+    Task.findByIdAndUpdate(id, { type }, { new: true }, (err, dataTask) => {
         if (err) return res.status(500).json({ 'message': 'Непредвиденная ошибка запроса' });
         return res.status(200).json({ 'task': dataTask, 'message': 'Задача успешно обновлена' });
     });
 }
 
-export { tasks, taskCreate, taskEdit, taskDelete, taskMove }
+export { tasksGet, taskCreate, taskEdit, taskDelete, taskMove }

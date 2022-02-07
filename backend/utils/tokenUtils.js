@@ -26,4 +26,13 @@ const verifyAccessToken = (token) => {
     }
 }
 
-export { tokenGenerate, verifyAccessToken }
+const verifyRefreshToken = (token) => {
+    try {
+        const data = jwt.verify(token, process.env.SECRET_KEY_REFRESH);
+        return data;
+    } catch (e) {
+        console.log('Токен не валиден');
+    }
+}
+
+export { tokenGenerate, verifyAccessToken, verifyRefreshToken }

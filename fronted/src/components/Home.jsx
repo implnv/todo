@@ -10,10 +10,7 @@ const Home = () => {
     if (!token) return <Navigate to='login' /> 
 
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(userAPI.refresh(token));
-    }, [dispatch, token]);
+    dispatch(userAPI.init());
 
     return (
         <div className="m-3 overflow-hidden">
